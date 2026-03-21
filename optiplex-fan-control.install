@@ -1,0 +1,30 @@
+post_install() {
+    # Reload systemd to pick up the new service file
+    systemctl daemon-reload
+
+    # Enable and start the service immediately in one command
+    systemctl enable --now optiplex-fan.service
+
+    echo "-----------------------------------------------------------"
+    echo " OPTIPLEX FAN CONTROL: INSTALLED & ACTIVE"
+    echo "-----------------------------------------------------------"
+    echo " 1. BIOS Fan Control: DISABLED (Managed by Daemon)"
+    echo " 2. Service Status:   RUNNING"
+    echo " 3. Configuration:    /etc/optiplex-fan-config"
+    echo ""
+    echo " IMPORTANT: To prevent KDE from forcing 'Power Save' mode,"
+    echo " check the README for the KDE optimization steps."
+    echo "-----------------------------------------------------------"
+}
+
+pre_remove() {
+    # Stop the service, which triggers ExecStopPost to
+    # re-enable BIOS fan control
+    echo ">> Stopping service and restoring BIOS fan control..."
+    systemctl disable --now optiplex-fan.service
+}
+
+post_remove() {
+    systemctl daemon-reload
+    echo ">> OptiPlex Fan Control removed. BIOS is back in charge."
+}

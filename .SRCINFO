@@ -1,0 +1,14 @@
+pkgbase = optiplex-fan-control
+	pkgdesc = Linear fan control daemon and BIOS bypass for Dell OptiPlex SFF series
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://gitlab.com/StochasticEagle/optiplex-fan-control
+	arch = x86_64
+	license = MIT
+	depends = gcc-libs
+	depends = bash
+	depends = msr-tools
+	source = optiplex-fan-control-1.0.0.tar.gz::https://gitlab.com/StochasticEagle/optiplex-fan-control/-/archive/v1.0.0/optiplex-fan-control-v1.0.0.tar.gz
+	sha256sums = 58ea04d86c8d81176a8eab7da9a31733a57d98390bccb939042a3f26bebd2197
+
+pkgname = optiplex-fan-control
