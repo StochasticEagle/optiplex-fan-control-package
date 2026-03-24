@@ -3,12 +3,15 @@ pkgbase = optiplex-fan-control
 	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://gitlab.com/StochasticEagle/optiplex-fan-control
+	install = optiplex-fan-control.install
 	arch = x86_64
 	license = MIT
 	depends = gcc-libs
 	depends = bash
 	depends = msr-tools
+	depends = lm_sensors
+	depends = glibc
 	source = optiplex-fan-control-1.0.0.tar.gz::https://gitlab.com/StochasticEagle/optiplex-fan-control/-/archive/v1.0.0/optiplex-fan-control-v1.0.0.tar.gz
-	sha256sums = 58ea04d86c8d81176a8eab7da9a31733a57d98390bccb939042a3f26bebd2197
+	sha256sums = 26e4f731dc202cffdd5935d0b5b575e382cef74c6b684edfdc56e06177cec951
 
 pkgname = optiplex-fan-control

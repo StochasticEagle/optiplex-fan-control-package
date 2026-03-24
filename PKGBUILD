@@ -9,7 +9,7 @@ source=("$pkgname-$pkgver.tar.gz::$url/-/archive/v$pkgver/$pkgname-v$pkgver.tar.
 license=('MIT')
 depends=('gcc-libs' 'bash' 'msr-tools' 'lm_sensors' 'glibc')
 install=optiplex-fan-control.install
-sha256sums=('58ea04d86c8d81176a8eab7da9a31733a57d98390bccb939042a3f26bebd2197')
+sha256sums=('26e4f731dc202cffdd5935d0b5b575e382cef74c6b684edfdc56e06177cec951')
 
 build() {
   # Use a wildcard to enter the directory created by the GitLab archive
