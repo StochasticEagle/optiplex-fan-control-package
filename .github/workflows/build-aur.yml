@@ -39,7 +39,7 @@ jobs:
           echo "name=$pkgname" >> "$GITHUB_OUTPUT"
           echo "version=$pkgver" >> "$GITHUB_OUTPUT"
           echo "release=$pkgrel" >> "$GITHUB_OUTPUT"
-          echo "tag=v${pkgver}-${pkgrel}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${pkgver}" >> "$GITHUB_OUTPUT"
 
       - name: Ensure release tag does not already exist
         env:
@@ -47,12 +47,12 @@ jobs:
           TAG: ${{ steps.package.outputs.tag }}
         run: |
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists. Increment pkgver or pkgrel before running this workflow again."
+            echo "Release $TAG already exists. Increment pkgver before running this workflow again."
             exit 1
           fi
 
           if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists. Increment pkgver or pkgrel before running this workflow again."
+            echo "Tag $TAG already exists. Increment pkgver before running this workflow again."
             exit 1
           fi
 
@@ -103,13 +103,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.package.outputs.tag }}
-          VERSION: ${{ steps.package.outputs.version }}
-          PKGREL: ${{ steps.package.outputs.release }}
           PACKAGE_FILE: ${{ steps.artifact.outputs.file }}
         run: |
           gh release create "$TAG" "$PACKAGE_FILE" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "optiplex-fan-control ${VERSION}-${PKGREL}" \
+            --title "$TAG" \
             --generate-notes \
             --latest
