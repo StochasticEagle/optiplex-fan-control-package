@@ -1,0 +1,67 @@
+name: Build AUR Package
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Update Arch Linux
+        run: pacman -Syu --noconfirm
+
+      - name: Install build dependencies
+        run: |
+          pacman -S --needed --noconfirm \
+            base-devel \
+            git \
+            namcap \
+            msr-tools \
+            lm_sensors
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create build user
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Verify .SRCINFO
+        run: |
+          su builder -c '
+            cd "$GITHUB_WORKSPACE"
+            makepkg --printsrcinfo > .SRCINFO.generated
+            diff -u .SRCINFO .SRCINFO.generated
+          '
+
+      - name: Build package
+        run: |
+          su builder -c '
+            cd "$GITHUB_WORKSPACE"
+            makepkg --cleanbuild --noconfirm
+          '
+
+      - name: Run namcap
+        continue-on-error: true
+        run: |
+          namcap PKGBUILD
+          namcap ./*.pkg.tar.zst
+
+      - name: List package
+        run: ls -lh ./*.pkg.tar.zst
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: optiplex-fan-control-package
+          path: ./*.pkg.tar.zst
+          if-no-files-found: error
