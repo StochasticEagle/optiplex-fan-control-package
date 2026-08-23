@@ -85,17 +85,26 @@ jobs:
       - name: Locate package
         id: artifact
         shell: bash
+        env:
+          PKGNAME: ${{ steps.package.outputs.name }}
         run: |
           shopt -s nullglob
-          packages=(./*.pkg.tar.zst)
+          packages=(./"${PKGNAME}"-*.pkg.tar.zst)
+          main_packages=()
 
-          if (( ${#packages[@]} != 1 )); then
-            echo "Expected exactly one built package, found ${#packages[@]}."
-            printf '%s\n' "${packages[@]}"
+          for package in "${packages[@]}"; do
+            if [[ "$package" != ./${PKGNAME}-debug-* ]]; then
+              main_packages+=("$package")
+            fi
+          done
+
+          if (( ${#main_packages[@]} != 1 )); then
+            echo "Expected exactly one main package, found ${#main_packages[@]}."
+            printf '%s\n' "${main_packages[@]}"
             exit 1
           fi
 
-          package="${packages[0]#./}"
+          package="${main_packages[0]#./}"
           echo "file=$package" >> "$GITHUB_OUTPUT"
           ls -lh "$package"
 
