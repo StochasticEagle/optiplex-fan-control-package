@@ -21,21 +21,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          mapfile -t references < <(
-            grep -RhoE 'uses:[[:space:]]*[^[:space:]#]+' .github/workflows \
-              --include='*.yml' --include='*.yaml' \
-              | sed -E 's/^uses:[[:space:]]*//' \
+          checker='.github/workflows/check-actions.yml'
+
+          mapfile -t records < <(
+            find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) \
+              ! -path "$checker" -print0 \
+              | sort -z \
+              | while IFS= read -r -d '' file; do
+                  grep -hoE 'uses:[[:space:]]*[^[:space:]#]+' "$file" \
+                    | sed -E "s#^#${file}|#; s#uses:[[:space:]]*##"
+                done \
               | sort -u
           )
 
           {
             echo '# GitHub Actions version check'
             echo
-            echo '| Action | Current | Latest major | Status |'
-            echo '|---|---:|---:|---|'
+            echo '| Workflow | Action | Current | Latest major | Status |'
+            echo '|---|---|---:|---:|---|'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          for reference in "${references[@]}"; do
+          for record in "${records[@]}"; do
+            file="${record%%|*}"
+            reference="${record#*|}"
+
             case "$reference" in
               ./*|docker://*)
                 continue
@@ -49,6 +58,7 @@ jobs:
             action_path="${reference%@*}"
             current="${reference##*@}"
             owner_repo="$(cut -d/ -f1,2 <<< "$action_path")"
+            workflow="${file#.github/workflows/}"
 
             tags="$(gh api --paginate "/repos/${owner_repo}/tags?per_page=100" --jq '.[].name' 2>/dev/null || true)"
 
@@ -80,8 +90,8 @@ jobs:
               status='Non-version ref; review manually'
             fi
 
-            echo "| \`${action_path}\` | \`${current}\` | \`${latest_major}\` | ${status} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| \`${workflow}\` | \`${action_path}\` | \`${current}\` | \`${latest_major}\` | ${status} |" >> "$GITHUB_STEP_SUMMARY"
           done
 
           echo >> "$GITHUB_STEP_SUMMARY"
-          echo 'This workflow is report-only and never changes workflow files.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This workflow is report-only, excludes itself, and never changes workflow files.' >> "$GITHUB_STEP_SUMMARY"
