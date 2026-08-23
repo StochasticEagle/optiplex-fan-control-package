@@ -28,7 +28,7 @@ jobs:
             lm_sensors
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read package metadata
         id: package
